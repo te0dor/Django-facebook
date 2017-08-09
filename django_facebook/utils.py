@@ -7,7 +7,11 @@ try:
 except ImportError:
     from datetime import datetime as compatible_datetime
 from datetime import datetime
-from django.apps import apps
+try:
+    from django.apps import apps
+except ImportError:
+    apps = {}
+
 from django.http import QueryDict, HttpResponse, HttpResponseRedirect
 from django.conf import settings
 import django.contrib.auth
@@ -41,7 +45,10 @@ def get_profile_model():
     profile_string = getattr(settings, 'AUTH_PROFILE_MODULE', None)
     if profile_string:
         app_label, model_label = profile_string.split('.')
-        model = apps.get_model(app_label, model_label)
+        try:
+            model = apps.get_model(app_label, model_label)
+        except (ImportError, AttributeError):
+            model = models.get_model(app_label, model_label)
     return model
 
 
